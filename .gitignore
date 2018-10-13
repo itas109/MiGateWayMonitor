@@ -102,3 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+/src/MiGateWayMonitor/log
+/src/MiGateWayMonitor/global_config.py
+/src/MiGateWayMonitor/.idea
