@@ -10,11 +10,15 @@ import socket
 import sys
 import os
 import net_reconnect
+import ding_talk_robot
 
 import global_config as gl
 
 name = "MiGatewayMonitor"
-version = "v1.0.1.191007"
+version = "v1.0.2.191008"
+
+# 全局消息
+globalMiData = ""
 
 def get_gateway_heart():
     SENDERIP = "0.0.0.0"
@@ -45,7 +49,11 @@ def get_gateway_heart():
 # 检测程序
 def mi_run():
     udp_group_data = get_gateway_heart()
-    print(udp_group_data)
+    # print(udp_group_data)
+    global globalMiData
+    globalMiData = udp_group_data
+    print(globalMiData)
+    # send_ding_talk(globalMiData)
     model = data_json.get_model(udp_group_data)
     if model == 'sensor_wleak.aq1':  # 水浸传感器
         cmd = data_json.get_cmd(udp_group_data)
@@ -87,6 +95,16 @@ def send_family_email(email_content):
     else:
         print("邮件发送失败")
 
+# 发送钉钉
+def send_ding_talk(text):
+    dingTalkRobot = ding_talk_robot.iDingTalkRobot()
+    dingTalkRobot.sendText(text)
+
+# 发送消息：邮件、钉钉、短信等
+def send_all_msg(text):
+    send_family_email(text)
+    send_ding_talk(text)
+
 # 重启程序
 def restart_program():
     python = sys.executable
@@ -102,28 +120,37 @@ def netCheck():
     else:
         info = '网络异常，重启程序...'
         print(info)
-        send_family_email(info)
+        send_all_msg(info)
         # 重启程序
         restart_program()
 
+def sendMiData():
+    global globalMiData
+    send_ding_talk(globalMiData);
+
 sys.stdout = Logger()
 
-if __name__ == '__main__':
-    data_json = xiaomi_data_json.xiaomi_data_json
-    sms = twilio_sms.sms_client
-    mail = i_email.iEmail()
+data_json = xiaomi_data_json.xiaomi_data_json
+sms = twilio_sms.sms_client
+# mail = i_email.iEmail()
+# dingTalkRobot = ding_talk_robot.iDingTalkRobot()
 
+if __name__ == '__main__':
     info = '家庭卫士程序启动'
     print(info)
-    send_family_email(info)
+    send_all_msg(info)
 
     # 定时任务1
     info = '家庭卫士程序心跳包'
-    schedule.every().day.at("13:00").do(send_family_email, info)
+    schedule.every().day.at("13:00").do(send_all_msg, info)
 
     # 定时任务2
     # schedule.every(10).seconds.do(netCheck)
     schedule.every(30).minutes.do(netCheck)
+
+    # 定时任务3
+    schedule.every().day.at("8:50").do(sendMiData)
+    schedule.every().day.at("18:00").do(sendMiData)
 
     while True:
         schedule.run_pending()

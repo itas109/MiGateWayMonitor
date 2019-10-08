@@ -22,3 +22,6 @@ account_sid = "xxx"
 auth_token  = "xxx"
 # twilio number
 twilio_number = "+xxx"
+
+# 钉钉机器人
+dingTalkUrl = "https://oapi.dingtalk.com/robot/send?access_token=xxx"
