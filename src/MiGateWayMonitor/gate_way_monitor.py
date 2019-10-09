@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import json
 from logger import Logger
 import xiaomi_data_json
 import twilio_sms
@@ -18,7 +19,7 @@ name = "MiGatewayMonitor"
 version = "v1.0.2.191008"
 
 # 全局消息
-globalMiData = ""
+globalMiData = {}
 
 def get_gateway_heart():
     SENDERIP = "0.0.0.0"
@@ -51,7 +52,8 @@ def mi_run():
     udp_group_data = get_gateway_heart()
     # print(udp_group_data)
     global globalMiData
-    globalMiData = udp_group_data
+    # 通过sid分组
+    globalMiData[data_json.get_custom(udp_group_data,'sid')] = udp_group_data
     print(globalMiData)
     # send_ding_talk(globalMiData)
     model = data_json.get_model(udp_group_data)
@@ -68,7 +70,7 @@ def mi_run():
                 sms.send_sms(gl.sms_send1, info)
                 sms.send_sms(gl.sms_send2, info)
                 info = '水浸传感器报警'
-                send_family_email(info)
+                send_all_msg(info)
             elif status == 'no_leak':  # 报警但是并没有发生水浸
                 # send message
                 info = 'no_leak bao jing jie chu'
@@ -76,7 +78,7 @@ def mi_run():
                 sms.send_sms(gl.sms_send2, info)
                 sms.send_sms(gl.sms_send2, info)
                 info = '水浸传感器报警解除'
-                send_family_email(info)
+                send_all_msg(info)
             else:
                 pass
         else:
@@ -128,6 +130,11 @@ def sendMiData():
     global globalMiData
     send_ding_talk(globalMiData);
 
+def sendHeartbeatData():
+    global globalMiData
+    info = '家庭卫士程序心跳包\n' + json.dumps(globalMiData)
+    send_all_msg(info)
+
 sys.stdout = Logger()
 
 data_json = xiaomi_data_json.xiaomi_data_json
@@ -141,16 +148,15 @@ if __name__ == '__main__':
     send_all_msg(info)
 
     # 定时任务1
-    info = '家庭卫士程序心跳包'
-    schedule.every().day.at("13:00").do(send_all_msg, info)
+    schedule.every().day.at("13:10").do(sendHeartbeatData)
 
     # 定时任务2
     # schedule.every(10).seconds.do(netCheck)
     schedule.every(30).minutes.do(netCheck)
 
     # 定时任务3
-    schedule.every().day.at("8:50").do(sendMiData)
-    schedule.every().day.at("18:00").do(sendMiData)
+    schedule.every().day.at("8:55").do(sendMiData)
+    schedule.every().day.at("18:05").do(sendMiData)
 
     while True:
         schedule.run_pending()
