@@ -13,6 +13,8 @@ import os
 import net_reconnect
 import ding_talk_robot
 
+import datetime
+
 import global_config as gl
 
 name = "MiGatewayMonitor"
@@ -53,7 +55,10 @@ def mi_run():
     # print(udp_group_data)
     global globalMiData
     # 通过sid分组
-    globalMiData[data_json.get_custom(udp_group_data,'sid')] = udp_group_data
+    udp_group_data_json = json.loads(udp_group_data)
+    # 增加时间戳
+    udp_group_data_json["time"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    globalMiData[data_json.get_custom(udp_group_data,'sid')] = udp_group_data_json
     print(globalMiData)
     # send_ding_talk(globalMiData)
     model = data_json.get_model(udp_group_data)
@@ -115,7 +120,7 @@ def restart_program():
 
 # 网络检测
 def netCheck():
-    bRet = net_reconnect.is_reachable("www.baidu1.com") | net_reconnect.is_reachable("www.baidu.com")
+    bRet = net_reconnect.is_reachable("www.baidu.com") | net_reconnect.is_reachable("www.baidu.com")
     # print(bRet)
     if (bRet):
         print("network ok")

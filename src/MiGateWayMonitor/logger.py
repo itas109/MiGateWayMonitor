@@ -3,7 +3,6 @@
 
 import sys
 import datetime
-import logging
 
 import os
 
@@ -17,28 +16,23 @@ class Logger(object):
     def __init__(self):
         self.terminal=sys.stdout
 
+
     def write(self,msg):
-        datenow= str(datetime.date.today())
+        folder = "log/"
+        mkdir(folder)
+        self.log = open(folder + str(datetime.date.today()) + ".log", "a")
 
-        out = '[ %s ] - %s \n' %(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),msg)
-        #out = msg
-        if sys.platform == 'win32':
-            folder = "log/"
-            mkdir(folder)
-            self.log = open(folder+datenow+".log", "a")
-        else:
-            folder = "/home/pi/MiGatewayMonitor/log/"
-            mkdir(folder)
-            self.log = open(folder+datenow+".log", "a")
+        if msg != '\n':
+            out = "[ %s ] - %s \n" %(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),msg)
+            self.terminal.write(out)
+            self.log.write(out)
 
-        self.terminal.write(out)
-        self.log.write(out)
         self.log.close()
 
     def flush(self):
         pass
 
-
-
-
+if __name__ == '__main__':
+    sys.stdout = Logger()
+    print("abc123")
 
