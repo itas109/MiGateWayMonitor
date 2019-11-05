@@ -1,0 +1,50 @@
+{
+    "appenders": {
+        "out": {
+            "type": "console",
+            "layout":{
+                "type":"pattern",
+                "pattern":"%[[%d] [%p] %X{line}%] - %m"
+            }
+        },
+        "allLog": {
+            "type": "dateFile",
+            "filename": "./logs/app",
+            "pattern": "yyyy-MM-dd.log",
+            "alwaysIncludePattern": true,
+            "maxLogSize": 10485760,
+            "backups": 3,
+            "layout":{
+                "type":"pattern",
+                "pattern":"[%d] [%p] %X{line} - %m"
+            }
+        },
+        "errorLog": {
+            "type": "file",
+            "filename": "./logs/error",
+            "pattern": "yyyy-MM-dd.log",
+            "alwaysIncludePattern": true,
+            "maxLogSize": 10485760,
+            "backups": 3,
+            "layout":{
+                "type":"pattern",
+                "pattern":"[%d] [%p] %X{line} - %m"
+            }
+        },
+        "error": {
+            "type": "logLevelFilter",
+            "level": "error",
+            "appender": "errorLog"
+        }
+    },
+    "categories": {
+        "default": {
+            "appenders": [
+                "out",
+                "allLog",
+                "error"
+            ],
+            "level": "debug"
+        }
+    }
+}
