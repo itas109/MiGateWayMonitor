@@ -69,21 +69,21 @@ def mi_run():
             status = data_json.get_custom(data, 'status')
 
             if status == 'leak':  # 发生水浸则发送短信
+                info = '水浸传感器报警'
+                send_all_msg(info)
                 # send message
                 info = 'leak lou shui bao jing'
                 print(info)
                 sms.send_sms(gl.sms_send1, info)
                 sms.send_sms(gl.sms_send2, info)
-                info = '水浸传感器报警'
-                send_all_msg(info)
             elif status == 'no_leak':  # 报警但是并没有发生水浸
+                info = '水浸传感器报警解除'
+                send_all_msg(info)
                 # send message
                 info = 'no_leak bao jing jie chu'
                 print(info)
                 sms.send_sms(gl.sms_send2, info)
                 sms.send_sms(gl.sms_send2, info)
-                info = '水浸传感器报警解除'
-                send_all_msg(info)
             else:
                 pass
         else:
