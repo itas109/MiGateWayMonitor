@@ -1,0 +1,24 @@
+// 配置文件
+// 2019-11-05
+
+let globalConfig = {
+    // 小米网关配置信息
+    "miGatewayInfo":{
+        "udpMulticastAddr":"224.0.0.50", //udp组播地址
+        "udpMulticastPort":9898 //udp组播端口
+    },
+    "dingTalkInfo":{
+        "dingTalkUrl":"https://oapi.dingtalk.com/robot/send?access_token=xxx"
+    },
+    "emailInfo":{
+        // 第三方 SMTP 服务
+        "host" :"smtp.qq.com",  // 设置服务器
+        "user" : "xxx",  // 用户名
+        "pwd" : "xxx",  // 口令
+        "fromAddr" : 'xxx@qq.com',
+        "sendList":['xxx@qq.com', 'xxx@qq.com']
+    },
+    "logLevel": "all",//all debug info warn error fatal off
+}
+
+exports.globalConfig = globalConfig;

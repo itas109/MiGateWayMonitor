@@ -1,14 +1,21 @@
 'use strict';
 
 global.logger = require("./LogHelper/log_helper").logger;
-let globalConfig =  require("./Config/config").globalConfig;
+let globalConfig =  undefined;
+try {
+    globalConfig =  require("./Config/config").globalConfig;
+
+} catch (error) {
+    logger.error('请修改Config目录下config.js.example的参数，并重命名为config.js');
+    return;
+}
 
 logger.setLevel(globalConfig.logLevel);
 
 const dgram = require('dgram');
 const client = dgram.createSocket('udp4');
-const multicastAddr = '224.0.0.50';
-const multicastPort = 9898;
+const multicastAddr = globalConfig.miGatewayInfo.udpMulticastAddr;
+const multicastPort = globalConfig.miGatewayInfo.udpMulticastPort;
 
 client.on('close', () => {
     logger.info('socket已关闭');
