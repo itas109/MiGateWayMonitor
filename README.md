@@ -10,3 +10,5 @@ npm install
 
 npm start
 ```
+
+![image](https://github.com/itas109/MiGateWayMonitor/raw/master/pic/pi.jpg)
