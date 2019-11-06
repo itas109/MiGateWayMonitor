@@ -2,6 +2,9 @@
 // 2019-11-05
 
 let globalConfig = {
+    "version":"家庭卫士 v1.0.3.191106",
+    //定时任务规则(Cron风格定时器),每天13点10分和18点10分
+    "scheduleRule":"0 10 13,18 * * *",
     // 小米网关配置信息
     "miGatewayInfo":{
         "udpMulticastAddr":"224.0.0.50", //udp组播地址
