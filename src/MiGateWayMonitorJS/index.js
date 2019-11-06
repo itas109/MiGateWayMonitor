@@ -31,6 +31,8 @@ const schedule = require('node-schedule');
 // 全局数据存储
 let globalMiData = {}
 
+// 获取当前时间戳
+let watchDogTime = Date.now();
 
 client.on('close', () => {
     logger.info('socket已关闭');
@@ -50,6 +52,7 @@ client.on('listening', () => {
 });
 
 client.on('message', (msg, rinfo) => {
+    watchDogTime = Date.now();
     //logger.info(`receive message from ${rinfo.address}:${rinfo.port}：${msg}`);
     try {
         let jsonObj = JSON.parse(msg);
@@ -70,6 +73,17 @@ client.on('message', (msg, rinfo) => {
 
 client.bind(multicastPort);
 
+// 看门狗任务 每分钟检查两次
+schedule.scheduleJob('0,30 * * * * *',()=>{
+    if( Date.now() - watchDogTime > globalConfig.watchDogTimeout){
+
+        sendMsg.sendMsgAll('看门狗超时，程序重启');
+
+        process.exit(1);
+    }
+}); 
+
+// 定时任务
 schedule.scheduleJob(globalConfig.scheduleRule,()=>{
     let info  = '家庭卫士程序心跳包\n\n' + JSON.stringify(globalMiData);
 
