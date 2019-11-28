@@ -5,12 +5,14 @@
   "main": "auto.js",
   "dependencies": {
     "dingtalk-robot-sender": "^1.2.0",
+    "moment": "^2.24.0",
     "node-schedule": "^1.3.2",
     "nodemailer": "^6.3.1"
   },
   "devDependencies": {},
   "scripts": {
-    "start":"node auto.js"
+    "prestart": "npm install",
+    "start": "node auto.js"
   },
   "author": "itas109"
 }

@@ -28,6 +28,14 @@ const business = require('./business');
 // 定时器
 const schedule = require('node-schedule');
 
+// 时间
+const moment = require('moment');
+// 设置简体中文
+moment.locale('zh-cn');
+
+// 程序启动时间
+let appStartTime = moment().format('YYYY-MM-DD HH:mm:ss');
+
 // 全局数据存储
 let globalMiData = {}
 
@@ -57,7 +65,7 @@ client.on('message', (msg, rinfo) => {
     try {
         let jsonObj = JSON.parse(msg);
 
-        jsonObj['time'] = new Date().toLocaleString();
+        jsonObj['time'] = moment().format('YYYY-MM-DD HH:mm:ss');
 
         logger.debug(JSON.stringify(jsonObj));
 
@@ -85,7 +93,7 @@ schedule.scheduleJob('0,30 * * * * *',()=>{
 
 // 定时任务
 schedule.scheduleJob(globalConfig.scheduleRule,()=>{
-    let info  = '家庭卫士程序心跳包\n\n' + JSON.stringify(globalMiData);
+    let info  = '家庭卫士程序心跳包\n\n连续运行 : ' + moment(appStartTime).fromNow(true) + '('+ appStartTime +')\n\n' + JSON.stringify(globalMiData);
 
     sendMsg.sendMsgAll(info);
 }); 
