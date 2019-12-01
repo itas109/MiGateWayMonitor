@@ -105,3 +105,4 @@ venv.bak/
 /src/MiGateWayMonitor/log
 /src/MiGateWayMonitor/global_config.py
 /src/MiGateWayMonitor/.idea
+/src/MiGateWayMonitorJS/Config/config.js
