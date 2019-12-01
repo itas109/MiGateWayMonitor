@@ -14,6 +14,8 @@ let globalConfig = undefined;
 try {
     globalConfig = require(globalConfigPath).globalConfig;
 
+    globalLogger.info(globalConfig.version);
+
 } catch (error) {
     globalLogger.error('请修改Config目录下config.js.example的参数，并重命名为config.js');
     return;
@@ -34,8 +36,6 @@ try {
 } catch (error) {
     globalLogger.error(error);
 }
-
-require
 
 // UDP组播
 const dgram = require('dgram');
@@ -134,6 +134,8 @@ function reLoadConfig() {
         delete require.cache[globalConfigPath];
 
         globalConfig = require(globalConfigPath).globalConfig;
+
+        globalLogger.info(globalConfig.version);
 
         globalLogger.setLevel(globalConfig.logLevel);
 
