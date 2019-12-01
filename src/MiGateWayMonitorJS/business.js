@@ -3,7 +3,7 @@
  * @param {*} jsonObj 
  */
 function business(jsonObj) {
-    // global.logger.debug(jsonObj);
+    // globalLogger.debug(jsonObj);
 
     if (typeof (jsonObj) === 'object') {
         if (jsonObj.model === 'sensor_wleak.aq1') { // 水浸传感器
@@ -12,9 +12,9 @@ function business(jsonObj) {
             if (jsonObj.cmd == 'report') { // 只处理上报数据
                 let dataObj = JSON.parse(jsonObj.data);
                 if (dataObj.status === 'leak') {
-                    sendMsg.sendMsgAll('水浸传感器发生报警');
+                    globalSendMsg.sendMsgAll('水浸传感器发生报警');
                 } else if (dataObj.status === 'no_leak') {
-                    sendMsg.sendMsgAll('水浸传感器解除报警');
+                    globalSendMsg.sendMsgAll('水浸传感器解除报警');
                 } else {
 
                 }

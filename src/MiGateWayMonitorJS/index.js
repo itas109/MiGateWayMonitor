@@ -1,16 +1,41 @@
 'use strict';
 
-global.logger = require("./LogHelper/log_helper").logger;
+const fs = require('fs');
+const path = require('path');
+
+// 全局根目录路径
+global.globalRootDir = path.dirname(require.main.filename);
+// 全局配置文件路径
+global.globalConfigPath = path.join(globalRootDir,'/Config/config.js');
+
+
+global.globalLogger = require('./LogHelper/log_helper.js').logger;
 let globalConfig = undefined;
 try {
-    globalConfig = require("./Config/config").globalConfig;
+    globalConfig = require(globalConfigPath).globalConfig;
 
 } catch (error) {
-    logger.error('请修改Config目录下config.js.example的参数，并重命名为config.js');
+    globalLogger.error('请修改Config目录下config.js.example的参数，并重命名为config.js');
     return;
 }
 
-logger.setLevel(globalConfig.logLevel);
+globalLogger.setLevel(globalConfig.logLevel);
+
+try {
+    fs.watchFile(globalConfigPath, (curr, prev) => {
+        if (curr.mtime !== prev.mtime) {
+            globalLogger.info('config.js is changed. system reload config about it.');
+
+            reLoadConfig();
+        }
+    });
+
+    globalLogger.info('file watching. ' + globalConfigPath);
+} catch (error) {
+    globalLogger.error(error);
+}
+
+require
 
 // UDP组播
 const dgram = require('dgram');
@@ -19,11 +44,12 @@ const multicastAddr = globalConfig.miGatewayInfo.udpMulticastAddr;
 const multicastPort = globalConfig.miGatewayInfo.udpMulticastPort;
 
 // 消息模块
-const SendMsgAll = require('./sendMsgAll');
-global.sendMsg = new SendMsgAll(globalConfig);
+const SendMsgAll = require('./sendMsgAll.js');
+global.globalSendMsg = new SendMsgAll();
+globalSendMsg.init(globalConfig);
 
 // 业务模块
-const business = require('./business');
+const business = require('./business.js');
 
 // 定时器
 const schedule = require('node-schedule');
@@ -43,17 +69,17 @@ let globalMiData = {}
 let watchDogTime = Date.now();
 
 client.on('close', () => {
-    logger.info('socket已关闭');
+    globalLogger.info('socket已关闭');
 });
 
 client.on('error', (err) => {
-    logger.error(err);
+    globalLogger.error(err);
 
-    sendMsg.sendMsgAll('程序出错了...');
+    globalSendMsg.sendMsgAll('程序出错了...');
 });
 
 client.on('listening', () => {
-    logger.info(`已加入udp组播 ${multicastAddr}, 端口 ${multicastPort}`);
+    globalLogger.info(`已加入udp组播 ${multicastAddr}, 端口 ${multicastPort}`);
     client.addMembership(multicastAddr);
 
     sendMsg.sendMsgAll('程序启动...');
@@ -61,7 +87,7 @@ client.on('listening', () => {
 
 client.on('message', (msg, rinfo) => {
     watchDogTime = Date.now();
-    //logger.info(`receive message from ${rinfo.address}:${rinfo.port}：${msg}`);
+    //globalLogger.info(`receive message from ${rinfo.address}:${rinfo.port}：${msg}`);
     try {
         //{"cmd":"heartbeat","model":"gateway","sid":"3412e008774ad","short_id":"0","token":"zUNAahM16GPi88B1","data":"{\"ip\":\"192.168.1.100\"}"}
         let jsonObj = JSON.parse(msg);
@@ -71,7 +97,7 @@ client.on('message', (msg, rinfo) => {
         value['data'] = jsonObj['data'];
         value['time'] = moment().format('YYYY-MM-DD HH:mm:ss');
 
-        logger.debug(`${key} : ` + JSON.stringify(value));
+        globalLogger.debug(`${key} : ` + JSON.stringify(value));
 
         // 数据存储
         globalMiData[key] = value;
@@ -79,25 +105,42 @@ client.on('message', (msg, rinfo) => {
         // 业务处理
         business.business(jsonObj);
     } catch (error) {
-        logger.error(error);
+        globalLogger.error(error);
     }
 });
 
 client.bind(multicastPort);
 
 // 看门狗任务 每分钟检查两次
-schedule.scheduleJob('0,30 * * * * *',()=>{
-    if( Date.now() - watchDogTime > globalConfig.watchDogTimeout){
+schedule.scheduleJob('0,30 * * * * *', () => {
+    if (Date.now() - watchDogTime > globalConfig.watchDogTimeout) {
 
         sendMsg.sendMsgAll('看门狗超时，程序重启');
 
         process.exit(1);
     }
-}); 
+});
 
 // 定时任务
-schedule.scheduleJob(globalConfig.scheduleRule,()=>{
-    let info  = '家庭卫士程序心跳包\n\n连续运行 : ' + moment(appStartTime).fromNow(true) + '('+ appStartTime +')\n\n' + JSON.stringify(globalMiData);
+let task1 = schedule.scheduleJob(globalConfig.scheduleRule, () => {
+    let info = '家庭卫士程序心跳包\n\n连续运行 : ' + moment(appStartTime).fromNow(true) + '(' + appStartTime + ')\n\n' + JSON.stringify(globalMiData);
 
     sendMsg.sendMsgAll(info);
-}); 
+});
+
+// 重载配置文件
+function reLoadConfig() {
+    try {
+        delete require.cache[globalConfigPath];
+
+        globalConfig = require(globalConfigPath).globalConfig;
+
+        globalLogger.setLevel(globalConfig.logLevel);
+
+        globalSendMsg.init(globalConfig);
+
+        schedule.rescheduleJob(task1, globalConfig.scheduleRule);
+    } catch (error) {
+        globalLogger.error(error);
+    }
+}

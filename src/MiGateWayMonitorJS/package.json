@@ -1,6 +1,6 @@
 {
   "name": "migatewaymonitorjs",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "",
   "main": "auto.js",
   "dependencies": {

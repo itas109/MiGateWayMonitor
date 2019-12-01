@@ -5,7 +5,11 @@ const ChatBot = require('dingtalk-robot-sender');
 let nodemailer = require("nodemailer");
 
 class SendMsgAll {
-    constructor(globalConfig) {
+    constructor() {
+
+    }
+
+    init(globalConfig) {
         this.dingTalkRobot = new ChatBot({
             webhook: globalConfig.dingTalkInfo.dingTalkUrl
         });
@@ -30,7 +34,7 @@ class SendMsgAll {
         this.transporter.sendMail(this.mailOptions);
 
         // 日志
-        global.logger.info(text);
+        globalLogger.info(text);
     }
 }
 
