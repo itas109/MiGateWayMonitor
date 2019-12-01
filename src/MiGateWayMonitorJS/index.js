@@ -14,6 +14,8 @@ let globalConfig = undefined;
 try {
     globalConfig = require(globalConfigPath).globalConfig;
 
+    globalLogger.info(globalConfig.version);
+
 } catch (error) {
     globalLogger.error('请修改Config目录下config.js.example的参数，并重命名为config.js');
     return;
@@ -34,8 +36,6 @@ try {
 } catch (error) {
     globalLogger.error(error);
 }
-
-require
 
 // UDP组播
 const dgram = require('dgram');
@@ -82,7 +82,7 @@ client.on('listening', () => {
     globalLogger.info(`已加入udp组播 ${multicastAddr}, 端口 ${multicastPort}`);
     client.addMembership(multicastAddr);
 
-    sendMsg.sendMsgAll('程序启动...');
+    globalSendMsg.sendMsgAll('程序启动...');
 });
 
 client.on('message', (msg, rinfo) => {
@@ -115,7 +115,7 @@ client.bind(multicastPort);
 schedule.scheduleJob('0,30 * * * * *', () => {
     if (Date.now() - watchDogTime > globalConfig.watchDogTimeout) {
 
-        sendMsg.sendMsgAll('看门狗超时，程序重启');
+        globalSendMsg.sendMsgAll('看门狗超时，程序重启');
 
         process.exit(1);
     }
@@ -125,7 +125,7 @@ schedule.scheduleJob('0,30 * * * * *', () => {
 let task1 = schedule.scheduleJob(globalConfig.scheduleRule, () => {
     let info = '家庭卫士程序心跳包\n\n连续运行 : ' + moment(appStartTime).fromNow(true) + '(' + appStartTime + ')\n\n' + JSON.stringify(globalMiData);
 
-    sendMsg.sendMsgAll(info);
+    globalSendMsg.sendMsgAll(info);
 });
 
 // 重载配置文件
@@ -134,6 +134,8 @@ function reLoadConfig() {
         delete require.cache[globalConfigPath];
 
         globalConfig = require(globalConfigPath).globalConfig;
+
+        globalLogger.info(globalConfig.version);
 
         globalLogger.setLevel(globalConfig.logLevel);
 
