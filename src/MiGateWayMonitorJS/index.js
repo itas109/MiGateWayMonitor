@@ -63,18 +63,22 @@ client.on('message', (msg, rinfo) => {
     watchDogTime = Date.now();
     //logger.info(`receive message from ${rinfo.address}:${rinfo.port}：${msg}`);
     try {
+        //{"cmd":"heartbeat","model":"gateway","sid":"3412e008774ad","short_id":"0","token":"zUNAahM16GPi88B1","data":"{\"ip\":\"192.168.1.100\"}"}
         let jsonObj = JSON.parse(msg);
 
-        jsonObj['time'] = moment().format('YYYY-MM-DD HH:mm:ss');
+        let key = jsonObj['model'] + "_" + jsonObj['sid'] + "_" + jsonObj['cmd'];
+        let value = {};
+        value['data'] = jsonObj['data'];
+        value['time'] = moment().format('YYYY-MM-DD HH:mm:ss');
 
-        logger.debug(JSON.stringify(jsonObj));
+        logger.debug(`${key} : ` + JSON.stringify(value));
 
         // 数据存储
-        globalMiData[jsonObj['sid']] = jsonObj;
-    
+        globalMiData[key] = value;
+
         // 业务处理
         business.business(jsonObj);
-        } catch (error) {
+    } catch (error) {
         logger.error(error);
     }
 });
