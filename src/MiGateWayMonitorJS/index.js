@@ -59,6 +59,8 @@ const moment = require('moment');
 // 设置简体中文
 moment.locale('zh-cn');
 
+const parseMilliseconds = require('parse-ms');
+
 // 程序启动时间
 let appStartTime = moment().format('YYYY-MM-DD HH:mm:ss');
 
@@ -123,7 +125,7 @@ schedule.scheduleJob('0,30 * * * * *', () => {
 
 // 定时任务
 let task1 = schedule.scheduleJob(globalConfig.scheduleRule, () => {
-    let info = '家庭卫士程序心跳包\n\n连续运行 : ' + moment(appStartTime).fromNow(true) + '(' + appStartTime + ')\n\n' + JSON.stringify(globalMiData);
+    let info = '家庭卫士程序心跳包\n\n连续运行 : ' + getTimeFromNow(new Date(appStartTime)) + ' (' + appStartTime + ')\n\n' + JSON.stringify(globalMiData);
 
     globalSendMsg.sendMsgAll(info);
 });
@@ -145,4 +147,9 @@ function reLoadConfig() {
     } catch (error) {
         globalLogger.error(error);
     }
+}
+
+function getTimeFromNow(unixTime){
+    let timeObj = parseMilliseconds(Date.now() - unixTime);
+    return timeObj.days + '天' + timeObj.hours + '小时' + timeObj.minutes + '分钟' + timeObj.seconds + '秒';
 }
