@@ -3,7 +3,7 @@ Mi GateWay Monitor(小米多功能网关监控系统) - https://blog.csdn.net/it
 
 # NodeJS版本
 
-Version : 1.0.4.191201
+Version : 1.0.5.191214
 
 ## 功能
 - [x] 配置文件动态修改
